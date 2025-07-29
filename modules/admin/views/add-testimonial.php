@@ -1,0 +1,115 @@
+<div class="main-panel">
+  <div class="content-wrapper">
+    <div class="card">
+      <div class="card-body">
+        <h4 class="card-title">Add New Testimonial</h4>
+        <div class="row">
+          <div class="col-12">
+            <form class="forms-sample" id="blog-form">
+              <div class="form-group">
+                <label>Title</label>
+                <input type="text" class="form-control" name="title" required>
+              </div>
+
+              <div class="form-group ">
+                <label>Details</label>
+                <input type="text" class="form-control" name="details">
+              </div>
+              <div class="form-group <?=!empty($serviceid)?'d-none':''?>">
+                <label>Description</label>
+                <textarea class="form-control" name="description" id="" rows="4"></textarea>
+              </div>
+              <div class="form-group <?=!empty($serviceid)?'d-none':''?>">
+                <label>Youtube video link</label>
+                <input type="text" class="form-control" name="link">
+              </div>
+              <div class="form-group">
+                <label>Select Image</label>
+                <br>
+                <button type="button" class="btn btn-primary select-image" data-img="image">Select Image</button>
+                <input type="hidden" class="image" name="image" />
+              </div>
+              <div class="progress mb-3 d-none">
+                <div class="progress-bar  progress-bar-success progress-bar-striped 
+active" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width:0%">
+                  0%
+                </div>
+              </div>
+              <input type="hidden" name="serviceid" value="<?=$serviceid?>">
+              <button type="submit" class="btn btn-primary btn-icon-text" id="sbt-btn">
+                <i class="far fa-check-square btn-icon-prepend"></i>
+                Submit
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="msg text-center"></div>
+    </div>
+  </div>
+  <script>
+    function Filevalidation() {
+      const fi = document.getElementById('file');
+      // Check if any file is selected.
+      if (fi.files.length > 0) {
+        for (const i = 0; i <= fi.files.length - 1; i++) {
+          const fsize = fi.files.item(i).size;
+          const file = Math.round((fsize / 1024));
+          // The size of the file.
+          if (file >= 5300) {
+            alert(
+              "File too Big, please select a file less than 6 MB");
+          } else {
+            return true;
+          }
+        }
+      }
+    }
+    $(document).ready(function(e) {
+      $("#blog-form").on('submit', (function(e) {
+        e.preventDefault();
+       /*  if (Filevalidation() === false) {
+          return false;
+        } */
+        $.ajax({
+          xhr: function() {
+            $('.progress').fadeIn();
+            var xhr = new window.XMLHttpRequest();
+            xhr.upload.addEventListener("progress", function(evt) {
+              if (evt.lengthComputable) {
+                var percentComplete = evt.loaded / evt.total;
+                percentComplete = parseInt(percentComplete * 100);
+                $('.progress-bar').width(percentComplete + '%');
+                $('.progress-bar').html(percentComplete + '%');
+              }
+            }, false);
+            return xhr;
+          },
+          url: site_url + "admin/insertupdatetestimonial",
+          type: "POST",
+          data: new FormData(this),
+          dataType: 'json',
+          contentType: false,
+          cache: false,
+          processData: false,
+          beforeSend: function() {
+            $('#sbt-btn').addClass('loading');
+            $('.progress').removeClass('d-none');
+          },
+          complete: function() {
+            $('#sbt-btn').removeClass('loading');
+            $('.progress').fadeOut();
+            setTimeout(() => {
+              $('.progress-bar').width('0%');
+            }, 500);
+          },
+          success: function(res) {
+            $(".msg").html(res.msg);
+            if (res.status) {
+              $("#blog-form")[0].reset();
+            }
+          }
+        });
+      }));
+    });
+  </script>
